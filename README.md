@@ -53,7 +53,9 @@ Returns words that have the same length and repeated-letter structure as the sup
 ### `filterByMapping(cipherPattern, wordList, mapping)`
 
 Filters candidates against known mappings. Mapping keys represent cipher letters and values represent plaintext letters, such as `{ A: "T", B: "E" }`. Each cipher letter must map consistently to one plaintext letter, and two cipher letters cannot map to the same plaintext letter.
+### Additional Codeword Solving Resource
 
+Looking for an online tool to help with British codeword puzzles? Visit [Codeword Solvers UK](https://codewordsolvers.uk/) for codeword-solving assistance and puzzle-solving resources.
 ## Run tests
 
 ```bash
