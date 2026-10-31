@@ -1,118 +1,115 @@
 /**
- * Lightweight American/British English spelling converter.
- * This is a spelling helper, not a full language translator.
+ * Codeword Puzzle Pattern Helper
+ * Website: https://codewordsolvers.uk/
+ *
+ * This library filters a supplied word list by word shape and known
+ * cipher-to-plaintext letter mappings. It does not fetch answers online.
  */
 
-const AMERICAN_TO_BRITISH = {
-  color: "colour",
-  colors: "colours",
-  colorful: "colourful",
-  favorite: "favourite",
-  favorites: "favourites",
-  honor: "honour",
-  honorable: "honourable",
-  humor: "humour",
-  labor: "labour",
-  neighbor: "neighbour",
-  neighbors: "neighbours",
-  behavior: "behaviour",
-  behaviors: "behaviours",
-  organize: "organise",
-  organizes: "organises",
-  organized: "organised",
-  organizing: "organising",
-  organization: "organisation",
-  organizations: "organisations",
-  recognize: "recognise",
-  recognized: "recognised",
-  recognizing: "recognising",
-  realize: "realise",
-  realized: "realised",
-  analyze: "analyse",
-  analyzed: "analysed",
-  center: "centre",
-  centers: "centres",
-  centered: "centred",
-  centering: "centring",
-  theater: "theatre",
-  theaters: "theatres",
-  meter: "metre",
-  meters: "metres",
-  liter: "litre",
-  liters: "litres",
-  fiber: "fibre",
-  fibers: "fibres",
-  defense: "defence",
-  offense: "offence",
-  license: "licence",
-  catalog: "catalogue",
-  catalogs: "catalogues",
-  dialog: "dialogue",
-  dialogs: "dialogues",
-  traveled: "travelled",
-  traveling: "travelling",
-  traveler: "traveller",
-  travelers: "travellers",
-  canceled: "cancelled",
-  canceling: "cancelling",
-  gray: "grey",
-  check: "check",
-  airplane: "aeroplane",
-  airplanes: "aeroplanes",
-  tire: "tyre",
-  tires: "tyres",
-  curb: "kerb",
-  mom: "mum",
-  moms: "mums",
-  pajamas: "pyjamas",
-  jewelry: "jewellery",
-  mold: "mould",
-  molds: "moulds",
-  mustache: "moustache",
-  aluminum: "aluminium",
-  sulfur: "sulphur"
-};
-
-const BRITISH_TO_AMERICAN = Object.fromEntries(
-  Object.entries(AMERICAN_TO_BRITISH).map(([american, british]) => [british, american])
-);
-
-function replaceWords(text, dictionary) {
-  if (typeof text !== "string") {
-    throw new TypeError("Input must be a string.");
+/**
+ * Returns the repeated-letter pattern for a word.
+ * Examples: "NOON" -> "0.1.1.0"; "ELSE" -> "0.1.2.0".
+ */
+function letterPattern(word) {
+  if (typeof word !== "string" || !/^[a-z]+$/i.test(word)) {
+    throw new TypeError("word must contain letters only.");
   }
 
-  const keys = Object.keys(dictionary).sort((a, b) => b.length - a.length);
-  if (!keys.length) return text;
+  const seen = new Map();
+  let nextId = 0;
 
-  const pattern = new RegExp(
-    "\\b(" + keys.map(word => word.replace(/[.*+?^${}()|[\\]\\\\]/g, "\\$&")).join("|") + ")\\b",
-    "gi"
+  return word.toUpperCase().split("").map(letter => {
+    if (!seen.has(letter)) seen.set(letter, nextId++);
+    return seen.get(letter);
+  }).join(".");
+}
+
+/**
+ * Filters words with the same repeated-letter structure as a codeword.
+ * Example: candidatesForPattern("ABBA", ["NOON", "TREE", "MOON"])
+ * returns ["NOON"].
+ */
+function candidatesForPattern(cipherPattern, wordList) {
+  if (typeof cipherPattern !== "string" || !/^[a-z]+$/i.test(cipherPattern)) {
+    throw new TypeError("cipherPattern must contain letters only.");
+  }
+  if (!Array.isArray(wordList)) {
+    throw new TypeError("wordList must be an array of words.");
+  }
+
+  const target = letterPattern(cipherPattern);
+  const length = cipherPattern.length;
+
+  return wordList.filter(word =>
+    typeof word === "string" &&
+    /^[a-z]+$/i.test(word) &&
+    word.length === length &&
+    letterPattern(word) === target
   );
+}
 
-  return text.replace(pattern, match => {
-    const replacement = dictionary[match.toLowerCase()];
-    if (!replacement) return match;
+/**
+ * Filters candidate words using known cipher-letter -> plain-letter mappings.
+ * Mapping keys and values are single letters, e.g. { A: "T", B: "E" }.
+ * Mapping is one-to-one: two cipher letters cannot map to the same plain letter.
+ */
+function filterByMapping(cipherPattern, wordList, mapping = {}) {
+  if (typeof cipherPattern !== "string" || !/^[a-z]+$/i.test(cipherPattern)) {
+    throw new TypeError("cipherPattern must contain letters only.");
+  }
+  if (!Array.isArray(wordList)) {
+    throw new TypeError("wordList must be an array of words.");
+  }
+  if (!mapping || typeof mapping !== "object" || Array.isArray(mapping)) {
+    throw new TypeError("mapping must be an object.");
+  }
 
-    if (match === match.toUpperCase()) return replacement.toUpperCase();
-    if (match[0] === match[0].toUpperCase()) {
-      return replacement[0].toUpperCase() + replacement.slice(1);
+  const normalized = {};
+  const usedPlainLetters = new Map();
+
+  for (const [cipher, plain] of Object.entries(mapping)) {
+    if (!/^[a-z]$/i.test(cipher) || typeof plain !== "string" || !/^[a-z]$/i.test(plain)) {
+      throw new TypeError("Each mapping must be a single letter to a single letter.");
     }
-    return replacement;
+    const c = cipher.toUpperCase();
+    const p = plain.toUpperCase();
+
+    if (normalized[c] && normalized[c] !== p) {
+      throw new Error(`Cipher letter ${c} has conflicting mappings.`);
+    }
+    if (usedPlainLetters.has(p) && usedPlainLetters.get(p) !== c) {
+      throw new Error(`Plain letter ${p} is assigned to more than one cipher letter.`);
+    }
+    normalized[c] = p;
+    usedPlainLetters.set(p, c);
+  }
+
+  return wordList.filter(word => {
+    if (typeof word !== "string" || !/^[a-z]+$/i.test(word) || word.length !== cipherPattern.length) {
+      return false;
+    }
+
+    const candidate = word.toUpperCase();
+    const cipherToPlain = new Map();
+    const plainToCipher = new Map();
+
+    for (let i = 0; i < cipherPattern.length; i++) {
+      const cipher = cipherPattern[i].toUpperCase();
+      const plain = candidate[i];
+
+      if (normalized[cipher] && normalized[cipher] !== plain) return false;
+      if (cipherToPlain.has(cipher) && cipherToPlain.get(cipher) !== plain) return false;
+      if (plainToCipher.has(plain) && plainToCipher.get(plain) !== cipher) return false;
+
+      cipherToPlain.set(cipher, plain);
+      plainToCipher.set(plain, cipher);
+    }
+    return true;
   });
 }
 
-function toBritishEnglish(text) {
-  return replaceWords(text, AMERICAN_TO_BRITISH);
-}
-
-function toAmericanEnglish(text) {
-  return replaceWords(text, BRITISH_TO_AMERICAN);
-}
-
 module.exports = {
-  toBritishEnglish,
-  toAmericanEnglish,
-  AMERICAN_TO_BRITISH,
-  BRITISH_TO_AMERICAN
+  letterPattern,
+  candidatesForPattern,
+  filterByMapping
 };

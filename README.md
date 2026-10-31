@@ -1,12 +1,14 @@
-# American–British English Translator
+# Codeword Puzzle Pattern Helper
 
-A small JavaScript utility that converts common spelling variants between American and British English. It is a spelling helper, not a complete translation system; word meanings and context can differ between dialects.
+A lightweight JavaScript utility for narrowing down possible codeword puzzle answers using repeated-letter patterns and known letter mappings.
+
+This package is a helper for puzzle solvers, not a complete online solver. It works with a word list that you supply.
 
 ## Features
 
-- Convert common American spellings to British spellings.
-- Convert supported British spellings to American spellings.
-- Preserve basic capitalization.
+- Match a codeword's repeated-letter pattern against candidate words.
+- Filter candidates using known cipher-letter-to-answer-letter mappings.
+- Check one-to-one letter mapping rules.
 - No runtime dependencies.
 
 ## Installation
@@ -14,49 +16,59 @@ A small JavaScript utility that converts common spelling variants between Americ
 After publishing the package to npm:
 
 ```bash
-npm install codewordsolvers-american-british-english-translator
+npm install codewordsolvers-puzzle-pattern-helper
 ```
 
 ## Usage
 
 ```js
 const {
-  toBritishEnglish,
-  toAmericanEnglish
-} = require("codewordsolvers-american-british-english-translator");
+  letterPattern,
+  candidatesForPattern,
+  filterByMapping
+} = require("codewordsolvers-puzzle-pattern-helper");
 
-console.log(toBritishEnglish("My favorite color is gray."));
-// My favourite colour is grey.
+const words = ["noon", "moon", "tree", "else", "area"];
 
-console.log(toAmericanEnglish("My favourite colour is grey."));
-// My favorite color is gray.
+console.log(letterPattern("ABBA"));
+// "0.1.1.0"
+
+console.log(candidatesForPattern("ABBA", words));
+// ["noon"]
+
+console.log(filterByMapping("ABCD", words, { A: "T" }));
+// Candidates whose first letter is T, respecting one-to-one letter mapping.
 ```
 
 ## API
 
-### `toBritishEnglish(text)`
+### `letterPattern(word)`
 
-Converts supported American English spellings to British English.
+Returns a normalized repeated-letter pattern. For example, `NOON` becomes `0.1.1.0`.
 
-### `toAmericanEnglish(text)`
+### `candidatesForPattern(cipherPattern, wordList)`
 
-Converts supported British English spellings to American English.
+Returns words that have the same length and repeated-letter structure as the supplied codeword pattern.
 
-Both functions expect a string and throw a `TypeError` for other input types.
+### `filterByMapping(cipherPattern, wordList, mapping)`
 
-## Test
+Filters candidates against known mappings. Mapping keys represent cipher letters and values represent plaintext letters, such as `{ A: "T", B: "E" }`. Each cipher letter must map consistently to one plaintext letter, and two cipher letters cannot map to the same plaintext letter.
+
+## Run tests
 
 ```bash
-node test.js
+npm test
 ```
 
-## Website
+## Related resource
 
 For codeword puzzle-solving resources, visit [CodewordSolvers.uk](https://codewordsolvers.uk/).
 
-## Contributing
+## Limitations
 
-Issues and pull requests that improve spelling coverage, tests, and documentation are welcome.
+- Results depend on the word list you provide.
+- This package does not scrape websites, access private data, or guarantee a puzzle answer.
+- English spelling, word variants, and proper nouns depend on the chosen word list.
 
 ## License
 

@@ -1,26 +1,23 @@
 {
-  "name": "codewordsolvers-american-british-english-translator",
+  "name": "codewordsolvers-puzzle-pattern-helper",
   "version": "1.0.0",
-  "description": "A lightweight American and British English spelling converter.",
+  "description": "A lightweight JavaScript helper for filtering codeword puzzle answers by letter patterns and known mappings.",
   "main": "src/index.js",
   "type": "commonjs",
   "keywords": [
-    "american-english",
-    "british-english",
-    "spelling",
-    "translator",
-    "text-tools"
+    "codeword",
+    "codeword-puzzle",
+    "word-puzzle",
+    "pattern-matching",
+    "word-solver"
   ],
   "license": "MIT",
   "author": "",
   "repository": {
     "type": "git",
-    "url": "https://github.com/YOUR-GITHUB-USERNAME/american-british-english-translator.git"
+    "url": "https://github.com/marios-46/codeword-puzzle-solver-tools.git"
   },
   "homepage": "https://codewordsolvers.uk/",
-  "bugs": {
-    "url": "https://github.com/YOUR-GITHUB-USERNAME/american-british-english-translator/issues"
-  },
   "scripts": {
     "test": "node test.js"
   }
