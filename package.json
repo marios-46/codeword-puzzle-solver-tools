@@ -1,0 +1,27 @@
+{
+  "name": "codewordsolvers-american-british-english-translator",
+  "version": "1.0.0",
+  "description": "A lightweight American and British English spelling converter.",
+  "main": "src/index.js",
+  "type": "commonjs",
+  "keywords": [
+    "american-english",
+    "british-english",
+    "spelling",
+    "translator",
+    "text-tools"
+  ],
+  "license": "MIT",
+  "author": "",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YOUR-GITHUB-USERNAME/american-british-english-translator.git"
+  },
+  "homepage": "https://codewordsolvers.uk/",
+  "bugs": {
+    "url": "https://github.com/YOUR-GITHUB-USERNAME/american-british-english-translator/issues"
+  },
+  "scripts": {
+    "test": "node test.js"
+  }
+}
